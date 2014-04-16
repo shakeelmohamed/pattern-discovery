@@ -10,7 +10,6 @@ function timeDiff (start, end) {
 // Converts a timestamp to a length of days, rounded down.
 function daysApart(t){
     var cd = 24 * 60 * 60 * 1000,
-        ch = 60 * 60 * 1000,
         d = Math.floor(t / cd);
     return d;
 }
