@@ -14,19 +14,37 @@ def get_rating_object(tup):
         "value": int(tup[1])
     }
 
-def get_diffs_of_ratings(list):
+def get_diffs_of_ratings(l):
     """ Returns a double, the average number of days between the rating objects
     specified in the list parameter.
 
     :param list: A list of rating objects.
     """
-    if len(list) <= 1:
-        return 0.0
+    if len(l) <= 1:
+        return str(None)
     total = 0.0
-    for v in range(0, len(list)-1):
-        total = total + float((list[v+1]["date"] - list[v]["date"]).days)
-    return float(total / (len(list)-1))
+    for v in range(0, len(l)-1):
+        total = total + float((l[v+1]["date"] - l[v]["date"]).days)
+    return str(float(total / (len(l)-1)))
 
+def get_avg_of_list(l):
+    """
+    :param l: A list of rating objects.
+    :return float: The average of the ``value`` element
+    """
+    l = [e["value"] for e in l]
+    return reduce(lambda x, y: x + y, l) / float(len(l))
+
+def predict(target, entries):
+    """
+    :param target: A stringified date in the format: YYYY/MM/DD
+    :param emtries: A list of rating objects, used as training data
+    """
+    t = date(*map(int, target.split("/")))
+
+    ret = "By day of the week: %s" \
+          % (get_avg_of_list(dates_by_day_of_week[t.weekday()]))
+    return ret
 
 entries = [get_rating_object(line.rstrip("\n").split(", "))
     for line in open("data.txt").readlines()]
@@ -42,16 +60,34 @@ for e in entries:
 date_apart_by_value = [[] for i in range(0, 5)]
 i = 0
 for dates_of_value in dates_by_value:
-    print "Average days between %d ratings of value %d: %f" % \
+    print "Average days between %d ratings of value %d: %s" % \
           (len(dates_of_value), i, get_diffs_of_ratings(dates_of_value))
     i = i + 1
 
-print "Average days between %d bad days over a range of %d days: %f" % \
+print "----"
+
+print "Average days between %d bad days over a range of %s days: %s" % \
           (len(dates_by_value[0] + dates_by_value[1]),
            get_diffs_of_ratings([entries[0], entries[len(entries) - 1]]),
            get_diffs_of_ratings(dates_by_value[0] + dates_by_value[1]))
 
-print "Average days between %d good days over a range of %d days: %f" % \
+print "Average days between %d good days over a range of %s days: %s" % \
           (len(dates_by_value[3] + dates_by_value[4]),
            get_diffs_of_ratings([entries[0], entries[len(entries) - 1]]),
            get_diffs_of_ratings(dates_by_value[3] + dates_by_value[4]))
+
+# This is a zero-indexed list (so beware of the off by one problem)
+dates_by_day_of_week = [[] for i in range(0, 7)]
+for e in entries:
+    if e["date"].weekday() in range (0, 7):
+        dates_by_day_of_week[e["date"].weekday()].append(e)
+
+print "By day of week:"
+dow = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+i = 0
+for d in dates_by_day_of_week:
+    print "%s: %f" % (dow[i], get_avg_of_list(d))
+    i = i + 1
+
+print "Predicting 12/24/2013"
+print predict("2013/12/24", entries)
