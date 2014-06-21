@@ -44,6 +44,10 @@ def predict(target, entries):
 
     ret = "By day of the week: %s" \
           % (get_avg_of_list(dates_by_day_of_week[t.weekday()]))
+
+    #TODO: get days since last x rating, and next predicted
+    # x day (based on today being the assumed current)
+
     return ret
 
 entries = [get_rating_object(line.rstrip("\n").split(", "))
@@ -89,5 +93,6 @@ for d in dates_by_day_of_week:
     print "%s: %f" % (dow[i], get_avg_of_list(d))
     i = i + 1
 
-print "Predicting 12/24/2013"
-print predict("2013/12/24", entries)
+target_date = "2014/01/01"
+print "Predicting %s" % target_date
+print predict(target_date, entries)
